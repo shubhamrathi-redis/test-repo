@@ -43,6 +43,7 @@ done
 max_retries=30
 wait_between_retry=15
 success=false
+retry_count=0
 
 while [ $retry_count -lt $max_retries ]; do
     HTTP_RESPONSE=$(curl -o response.txt -w "%{http_code}" -k -L -u "$re_username:$re_password" -X POST -H "Content-Type: application/json" https://${fqdn_array[0]}:9443/v2/bdbs --data "{\"bdb\": {\"name\": \"$redb_name\",\"type\": \"redis\",\"memory_size\": 1073741824,\"shards_count\": 1,\"port\": $redb_port}}")
