@@ -40,7 +40,33 @@ for re_fqdn in "${fqdn_array[@]}"; do
   fi
 done
 
-curl -k -L -u "$re_username:$re_password" -X POST -H "Content-Type: application/json" https://${fqdn_array[0]}:9443/v2/bdbs --data "{\"bdb\": {\"name\": \"$redb_name\",\"type\": \"redis\",\"memory_size\": 1073741824,\"shards_count\": 1,\"port\": $redb_port}}"
-echo "created redb endpoint: redis-$redb_port.${fqdn_array[0]}:$redb_port"
+max_retries=30
+wait_between_retry=15
+success=false
 
-echo "operation completed successfully!!!"
+while [ $retry_count -lt $max_retries ]; do
+    HTTP_RESPONSE=$(curl -o response.txt -w "%{http_code}" -k -L -u "$re_username:$re_password" -X POST -H "Content-Type: application/json" https://${fqdn_array[0]}:9443/v2/bdbs --data "{\"bdb\": {\"name\": \"$redb_name\",\"type\": \"redis\",\"memory_size\": 1073741824,\"shards_count\": 1,\"port\": $redb_port}}")
+    if [ $? -ne 0 ]; then
+        echo "DB creating curl request failed"
+        exit 1
+    fi
+
+    if [ "$HTTP_RESPONSE" -eq 200 ]; then
+        echo "DB is created successfully"
+        success=true
+        break
+    fi
+
+  retry_count=$((retry_count + 1))
+  echo "Retry $retry_count/$max_retries: Waiting for $wait_between_retry seconds before retrying to created DB..."
+  sleep $wait_between_retry
+done
+
+if [ "$success" = false ]; then
+    echo "DB creating was unsuccessful exiting now!!!"
+    exit 1
+else
+    echo "created DB endpoint: redis-$redb_port.${fqdn_array[0]}:$redb_port"
+fi
+
+echo "Operation completed successfully!!!"
