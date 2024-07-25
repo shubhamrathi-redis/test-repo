@@ -46,7 +46,7 @@ success=false
 retry_count=0
 
 while [ $retry_count -lt $max_retries ]; do
-    HTTP_RESPONSE=$(curl -o response.txt -w "%{http_code}" -k -L -u "$re_username:$re_password" -X POST -H "Content-Type: application/json" https://${fqdn_array[0]}:9443/v2/bdbs --data "{\"bdb\": {\"name\": \"$redb_name\",\"type\": \"redis\",\"memory_size\": 1073741824,\"shards_count\": 1,\"port\": $redb_port, \"module_list\": [ { \"module_name\": \"search\" }, { \"module_name\": \"bf\" } ]}}")
+    HTTP_RESPONSE=$(curl -o response.txt -w "%{http_code}" -k -L -u "$re_username:$re_password" -X POST -H "Content-Type: application/json" https://${fqdn_array[0]}:9443/v2/bdbs --data "{\"bdb\": {\"name\": \"$redb_name\",\"type\": \"redis\",\"memory_size\": 1073741824,\"shards_count\": 1,\"port\": $redb_port, \"module_list\": [ { \"module_name\": \"search\", \"module_args\": \"\" }, { \"module_name\": \"bf\", \"module_args\": \"\" } ]}}")
     if [ $? -ne 0 ]; then
         echo "DB creating curl request failed"
         exit 1
